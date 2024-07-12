@@ -1,9 +1,10 @@
 package com.vineet.springBootWeb.controllers;
 
-import com.vineet.springBootWeb.dto.EmployeeDTO;
+import com.vineet.springBootWeb.entities.EmployeeEntity;
+import com.vineet.springBootWeb.repositories.EmployeeRepository;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
+import java.util.List;
 
 @RestController
 @RequestMapping(path = "employees")
@@ -14,20 +15,24 @@ public class EmployeeController {
     //        return "Get Message function called";
     //    }
 
+    private final EmployeeRepository employeeRepository;
+    public EmployeeController(EmployeeRepository employeeRepository) {
+        this.employeeRepository = employeeRepository;
+    }
+
     @GetMapping(path="/{employeeId}")
-    public EmployeeDTO getEmployeeById(@PathVariable Long employeeId) {
-        return new EmployeeDTO(employeeId, "Vineet", "vineet@gmail.com", 25, LocalDate.of(2024, 1, 23), true);
+    public EmployeeEntity getEmployeeById(@PathVariable Long employeeId) {
+        return employeeRepository.findById(employeeId).orElse(null);
     }
 
     @GetMapping
-    public String getAllEmployees(@RequestParam(required = false) Integer age) {
-    return "Hi Age "+age;
+    public List<EmployeeEntity> getAllEmployees(@RequestParam(required = false) Integer age) {
+    return employeeRepository.findAll();
     }
 
     @PostMapping
-    public EmployeeDTO createNewEmployee(@RequestBody EmployeeDTO inputEmployee) {
-        inputEmployee.setId(100L);
-        return inputEmployee;
+    public EmployeeEntity createNewEmployee(@RequestBody EmployeeEntity inputEmployee) {
+        return employeeRepository.save(inputEmployee);
     }
 
     @PutMapping
