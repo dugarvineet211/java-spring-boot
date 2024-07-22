@@ -1,6 +1,7 @@
 package com.vineet.springBootWeb.controllers;
 
 import com.vineet.springBootWeb.dto.EmployeeDTO;
+import com.vineet.springBootWeb.exceptions.ResourceNotFoundException;
 import com.vineet.springBootWeb.services.EmployeeService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -9,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @RestController
@@ -23,8 +25,9 @@ public class EmployeeController {
     @GetMapping(path="/{employeeId}")
     public ResponseEntity<EmployeeDTO> getEmployeeById(@PathVariable Long employeeId) {
         Optional<EmployeeDTO> employeeDTO =  employeeService.findById(employeeId);
-        return employeeDTO.map(ResponseEntity:: ok).orElse(ResponseEntity.notFound().build());
+        return employeeDTO.map(ResponseEntity:: ok).orElseThrow(()-> new ResourceNotFoundException("Employee not found!"));
     }
+
 
     @GetMapping
     public ResponseEntity<List<EmployeeDTO>> getAllEmployees(@RequestParam(required = false) Integer age) {

@@ -2,6 +2,7 @@ package com.vineet.springBootWeb.services;
 
 import com.vineet.springBootWeb.dto.EmployeeDTO;
 import com.vineet.springBootWeb.entities.EmployeeEntity;
+import com.vineet.springBootWeb.exceptions.ResourceNotFoundException;
 import com.vineet.springBootWeb.repositories.EmployeeRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.util.ReflectionUtils;
@@ -43,6 +44,7 @@ public class EmployeeService {
     }
 
     public EmployeeDTO updateEmployeeById(EmployeeDTO employeeDTO, Long employeeId) {
+        isEmployeeDoesNotExists(employeeId);
         System.out.println(employeeId);
         EmployeeEntity employeeEntity = modelMapper.map(employeeDTO, EmployeeEntity.class);
         employeeEntity.setId(employeeId);
@@ -50,22 +52,21 @@ public class EmployeeService {
         return modelMapper.map(savedEmployeeEntity, EmployeeDTO.class);
     }
 
-    public boolean isEmployeeDoesNotExists(Long employeeId) {
-        return !employeeRepository.existsById(employeeId);
+    public void isEmployeeDoesNotExists(Long employeeId) {
+        boolean exists = employeeRepository.existsById(employeeId);
+        if(!exists) {
+            throw new ResourceNotFoundException("Employee not found!");
+        }
     }
 
     public boolean deleteEmployeeById(Long employeeId) {
-        if(isEmployeeDoesNotExists(employeeId)) {
-            return false;
-        }
+        isEmployeeDoesNotExists(employeeId);
         employeeRepository.deleteById(employeeId);
         return true;
     }
 
     public EmployeeDTO updatePartialEmployeeById(Map<String, Object> updates, Long employeeId) {
-        if(isEmployeeDoesNotExists(employeeId)) {
-            return null;
-        }
+        isEmployeeDoesNotExists(employeeId);
         EmployeeEntity employeeEntity = employeeRepository.findById(employeeId).get();
         updates.forEach((key, value)->{
             Field toUpdate = ReflectionUtils.findRequiredField(EmployeeEntity.class, key);
